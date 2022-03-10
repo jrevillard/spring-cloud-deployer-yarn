@@ -136,9 +136,21 @@
 									<value>${project.version}</value>
 								</property>
 								<property>
-									<name>artifactVersion</name>
-									<value>1.0.0.BUILD-SNAPSHOT</value>
+									<name>artifactVersionSourceTime</name>
+									<value>2.1.4.RELEASE</value>
 								</property>
+								<property>
+                                    <name>artifactVersionLogSink</name>
+                                    <value>2.1.5.RELEASE</value>
+                                </property>
+                                <property>
+                                    <name>artifactVersionHdfsSink</name>
+                                    <value>2.1.4.RELEASE</value>
+                                </property>
+                                <property>
+                                    <name>artifactVersionTimestampTask</name>
+                                    <value>2.0.0</value>
+                                </property>
 							</properties>
 						</configuration>
 					</execution>

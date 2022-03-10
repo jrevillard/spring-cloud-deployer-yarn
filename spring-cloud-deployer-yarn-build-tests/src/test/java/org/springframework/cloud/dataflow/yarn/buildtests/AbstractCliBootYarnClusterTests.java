@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.yarn.buildtests;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,6 +63,7 @@ import org.springframework.yarn.test.support.ContainerLogUtils;
 @TestPropertySource("file:target/spring-cloud-deployer-yarn-build-tests/test.properties")
 public class AbstractCliBootYarnClusterTests implements ApplicationContextAware, EnvironmentAware {
 
+    protected static final String MAVEN_REPO = "https://repo.spring.io/release/";
 	private ApplicationContext applicationContext;
 	private Environment environment;
 	private Configuration configuration;
@@ -123,11 +124,11 @@ public class AbstractCliBootYarnClusterTests implements ApplicationContextAware,
 		return projectVersion;
 	}
 
-	protected ApplicationInfo submitApplicationAndWait(Object source, String[] args) throws Exception {
+	protected ApplicationInfo submitApplicationAndWait(Class<?> source, String[] args) throws Exception {
 		return submitApplicationAndWait(source, args, 60, TimeUnit.SECONDS);
 	}
 
-	protected ApplicationInfo submitApplicationAndWait(Object source, String[] args, long timeout, final TimeUnit unit) throws Exception {
+	protected ApplicationInfo submitApplicationAndWait(Class<?> source, String[] args, long timeout, final TimeUnit unit) throws Exception {
 		return submitApplicationAndWaitState(source, args, timeout, unit, YarnApplicationState.FINISHED, YarnApplicationState.FAILED);
 	}
 
@@ -185,7 +186,7 @@ public class AbstractCliBootYarnClusterTests implements ApplicationContextAware,
 	}
 
 
-	protected ApplicationInfo submitApplicationAndWaitState(Object source, String[] args, final long timeout,
+	protected ApplicationInfo submitApplicationAndWaitState(Class<?> source, String[] args, final long timeout,
 			final TimeUnit unit, final YarnApplicationState... applicationStates) throws Exception {
 
 		SpringApplicationBuilder builder = new SpringApplicationBuilder(source);

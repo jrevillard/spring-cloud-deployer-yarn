@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
@@ -41,8 +42,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.statemachine.StateContext;
-import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.StateContext.Stage;
+import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.listener.StateMachineListener;
 import org.springframework.statemachine.listener.StateMachineListenerAdapter;
 import org.springframework.util.Assert;
@@ -115,7 +116,7 @@ public class YarnAppDeployer implements AppDeployer {
 				contextRunArgs.add("--" + entry.getKey() + "=" + entry.getValue());
 			} else if (entry.getKey().startsWith("spring.cloud.deployer.yarn.app.streamcontainer")) {
 				// weird format with '--' is just straight pass to appmaster
-				contextRunArgs.add("--spring.yarn.client.launchcontext.arguments.--" + entry.getKey() + "='" + entry.getValue() + "'");
+				contextRunArgs.add("--spring.yarn.client.launchcontext.arguments.[--" + entry.getKey() + "]='" + entry.getValue() + "'");
 			}
 		}
 
@@ -125,21 +126,21 @@ public class YarnAppDeployer implements AppDeployer {
 		}
 
 		String artifactPath = isHdfsResource(resource) ? getHdfsArtifactPath(resource) : baseDir + "/artifacts/cache/";
-		contextRunArgs.add("--spring.yarn.client.launchcontext.arguments.--spring.cloud.deployer.yarn.appmaster.artifact=" + artifactPath);
+		contextRunArgs.add("--spring.yarn.client.launchcontext.arguments.[--spring.cloud.deployer.yarn.appmaster.artifact]=" + artifactPath);
 
 		// add group as 'spring.cloud.application.group'
 		definitionParameters = new HashMap<>(definitionParameters);
 		definitionParameters.put("spring.cloud.application.group", group);
 
 		final Message<String> message = MessageBuilder.withPayload(AppDeployerStateMachine.EVENT_DEPLOY)
-				.setHeader(AppDeployerStateMachine.HEADER_APP_VERSION, appVersion)
+				.setHeader(AbstractDeployerStateMachine.HEADER_APP_VERSION, appVersion)
 				.setHeader(AppDeployerStateMachine.HEADER_CLUSTER_ID, clusterId)
-				.setHeader(AppDeployerStateMachine.HEADER_GROUP_ID, group)
+				.setHeader(AbstractDeployerStateMachine.HEADER_GROUP_ID, group)
 				.setHeader(AppDeployerStateMachine.HEADER_COUNT, count)
-				.setHeader(AppDeployerStateMachine.HEADER_ARTIFACT, resource)
-				.setHeader(AppDeployerStateMachine.HEADER_ARTIFACT_DIR, artifactPath)
+				.setHeader(AbstractDeployerStateMachine.HEADER_ARTIFACT, resource)
+				.setHeader(AbstractDeployerStateMachine.HEADER_ARTIFACT_DIR, artifactPath)
 				.setHeader(AppDeployerStateMachine.HEADER_DEFINITION_PARAMETERS, definitionParameters)
-				.setHeader(AppDeployerStateMachine.HEADER_CONTEXT_RUN_ARGS, contextRunArgs)
+				.setHeader(AbstractDeployerStateMachine.HEADER_CONTEXT_RUN_ARGS, contextRunArgs)
 				.build();
 
 		// Use of future here is to set id when it becomes available from machine

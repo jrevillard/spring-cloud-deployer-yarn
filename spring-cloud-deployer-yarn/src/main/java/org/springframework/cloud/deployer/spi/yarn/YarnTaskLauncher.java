@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
@@ -101,8 +102,8 @@ public class YarnTaskLauncher implements TaskLauncher {
 		for (Entry<String, String> entry : definitionParameters.entrySet()) {
 			if (StringUtils.hasText(entry.getValue())) {
 				contextRunArgs
-						.add("--spring.yarn.client.launchcontext.arguments.--spring.cloud.deployer.yarn.appmaster.parameters."
-								+ entry.getKey() + ".='" + entry.getValue() + "'");
+						.add("--spring.yarn.client.launchcontext.arguments.[--spring.cloud.deployer.yarn.appmaster.parameters."
+								+ entry.getKey() + "]='" + entry.getValue() + "'");
 			}
 		}
 
@@ -119,14 +120,14 @@ public class YarnTaskLauncher implements TaskLauncher {
 		}
 		String artifactPath = isHdfsResource(resource) ? getHdfsArtifactPath(resource) : baseDir + "/artifacts/cache/";
 
-		contextRunArgs.add("--spring.yarn.client.launchcontext.arguments.--spring.cloud.deployer.yarn.appmaster.artifact=" + artifactPath + artifact);
-		contextRunArgs.add("--spring.yarn.client.launchcontext.arguments.--spring.cloud.deployer.yarn.appmaster.artifactName=" +  artifact);
+		contextRunArgs.add("--spring.yarn.client.launchcontext.arguments.[--spring.cloud.deployer.yarn.appmaster.artifact]=" + artifactPath + artifact);
+		contextRunArgs.add("--spring.yarn.client.launchcontext.arguments.[--spring.cloud.deployer.yarn.appmaster.artifactName]=" +  artifact);
 
 		// deployment properties override servers.yml which overrides application.yml
 		for (Entry<String, String> entry : deploymentProperties.entrySet()) {
 			if (StringUtils.hasText(entry.getValue())) {
 				if (entry.getKey().startsWith("spring.cloud.deployer.yarn.app.taskcontainer")) {
-					contextRunArgs.add("--spring.yarn.client.launchcontext.arguments.--" + entry.getKey() + "='" + entry.getValue() + "'");
+					contextRunArgs.add("--spring.yarn.client.launchcontext.arguments.[--" + entry.getKey() + "]='" + entry.getValue() + "'");
 				} else if (entry.getKey().startsWith("spring.cloud.deployer.yarn.app.taskappmaster")) {
 					contextRunArgs.add("--" + entry.getKey() + "=" + entry.getValue());
 				}
