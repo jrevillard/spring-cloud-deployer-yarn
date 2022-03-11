@@ -30,9 +30,9 @@ spring:
         options:
           - ${spring.cloud.deployer.yarn.app.taskcontainer.javaOpts:}
         arguments:
-          -Dserver.port: 0
-          -Dspring.jmx.enabled: false
-          -Dspring.config.location: servers.yml
+          --Dserver.port: 0
+          --Dspring.jmx.enabled: false
+          --Dspring.config.location: servers.yml
         locality: false
         archiveFile: placeholder.jar
     endpoints:

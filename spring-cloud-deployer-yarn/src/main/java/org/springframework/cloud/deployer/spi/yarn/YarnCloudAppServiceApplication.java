@@ -127,7 +127,8 @@ public class YarnCloudAppServiceApplication implements InitializingBean, Disposa
     if (client instanceof ApplicationYarnClient) {
       yarnClient = ((ApplicationYarnClient) client);
     } else {
-      throw new IllegalArgumentException("YarnClient need to be instanceof ApplicationYarnClient");
+      throw new IllegalArgumentException(
+          "YarnClient need to be instanceof ApplicationYarnClient and not " + client.getClass());
     }
     restTemplate = context.getBean(YarnSystemConstants.DEFAULT_ID_RESTTEMPLATE, RestTemplate.class);
     springYarnProperties = context.getBean(SpringYarnProperties.class);
