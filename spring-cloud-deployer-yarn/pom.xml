@@ -33,6 +33,16 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<!-- Can be remove if HDFS cannot be used anymore with the resource -->
+		<dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-deployer-resource-support</artifactId>
+        </dependency>
+        <!-- Can be remove if HDFS cannot be used anymore with the resource -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-deployer-resource-maven</artifactId>
+        </dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -53,6 +63,7 @@
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 				<includes>
+				    <include>META-INF/*</include>
 					<include>task.yml</include>
 					<include>stream.yml</include>
 					<include>appdeployer-model.uml</include>

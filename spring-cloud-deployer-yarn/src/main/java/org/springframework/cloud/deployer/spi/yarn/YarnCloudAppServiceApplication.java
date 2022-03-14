@@ -79,14 +79,14 @@ public class YarnCloudAppServiceApplication implements InitializingBean, Disposa
 
   private ConfigurableApplicationContext context;
   private ApplicationContextInitializer<?>[] initializers;
-  private List<Object> sources = new ArrayList<Object>();
-  private List<String> profiles = new ArrayList<String>();
+  private List<Object> sources = new ArrayList<>();
+  private List<String> profiles = new ArrayList<>();
   private Properties appProperties = new Properties();
-  private Map<String, Properties> configFilesContents = new HashMap<String, Properties>();
+  private Map<String, Properties> configFilesContents = new HashMap<>();
   private String[] args = new String[0];
 
   private final HashMap<String, YarnContainerClusterOperations> operationsCache =
-      new HashMap<String, YarnContainerClusterOperations>();
+      new HashMap<>();
 
   private ApplicationYarnClient yarnClient;
   private SpringYarnProperties springYarnProperties;
@@ -170,7 +170,7 @@ public class YarnCloudAppServiceApplication implements InitializingBean, Disposa
   }
 
   public Collection<CloudAppInstanceInfo> getSubmittedApplications() {
-    List<CloudAppInstanceInfo> appIds = new ArrayList<CloudAppInstanceInfo>();
+    List<CloudAppInstanceInfo> appIds = new ArrayList<>();
     for (ApplicationReport report : yarnClient.listApplications("DATAFLOW")) {
       appIds.add(new CloudAppInstanceInfo(report.getApplicationId().toString(), report.getName(),
           report.getYarnApplicationState().toString(), report.getOriginalTrackingUrl()));
@@ -179,7 +179,7 @@ public class YarnCloudAppServiceApplication implements InitializingBean, Disposa
   }
 
   public Collection<CloudAppInstanceInfo> getSubmittedApplications(String yarnApplicationId) {
-    List<CloudAppInstanceInfo> appIds = new ArrayList<CloudAppInstanceInfo>();
+    List<CloudAppInstanceInfo> appIds = new ArrayList<>();
     for (ApplicationReport report : yarnClient.listApplications("DATAFLOW")) {
       if (report.getApplicationId().toString().equals(yarnApplicationId)) {
         appIds.add(new CloudAppInstanceInfo(report.getApplicationId().toString(), report.getName(),
@@ -214,7 +214,7 @@ public class YarnCloudAppServiceApplication implements InitializingBean, Disposa
 
   public List<StreamClustersInfoReportData> getClusterInfo(ApplicationId applicationId,
       String clusterId) {
-    List<StreamClustersInfoReportData> data = new ArrayList<StreamClustersInfoReportData>();
+    List<StreamClustersInfoReportData> data = new ArrayList<>();
     YarnContainerClusterOperations operations =
         buildClusterOperations(restTemplate, yarnClient, applicationId);
 
@@ -340,7 +340,12 @@ public class YarnCloudAppServiceApplication implements InitializingBean, Disposa
           EndpointAutoConfiguration.class},
       excludeName = {
           "org.springframework.cloud.dataflow.server.config.DataFlowControllerAutoConfiguration",
-          "org.springframework.cloud.deployer.spi.yarn.autoconfigure.YarnDeployerAutoConfiguration"})
+          "org.springframework.cloud.deployer.spi.yarn.autoconfigure.YarnDeployerAutoConfiguration",
+          "org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration",
+          "org.springframework.cloud.dataflow.autoconfigure.local.LocalDataFlowServerAutoConfiguration",
+          "org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundryDataFlowServerConfiguration",
+          "org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundryTaskPlatformAutoConfiguration",
+          "org.springframework.cloud.dataflow.server.config.kubernetes.KubernetesTaskPlatformAutoConfiguration"})
   public static class Config {
   }
 

@@ -23,9 +23,7 @@
         <module>spring-cloud-deployer-yarn-appdeployerappmaster</module>
         <module>spring-cloud-deployer-yarn-tasklauncherappmaster</module>
         <module>spring-cloud-deployer-yarn</module>
-        <module>spring-cloud-deployer-yarn-autoconfig</module>
         <module>spring-cloud-deployer-yarn-build-tests</module>
-        <module>spring-cloud-starter-deployer-yarn</module>
     </modules>
 
     <dependencyManagement>

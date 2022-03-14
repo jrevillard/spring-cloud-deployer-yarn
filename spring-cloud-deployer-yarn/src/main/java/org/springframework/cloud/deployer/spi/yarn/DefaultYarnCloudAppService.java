@@ -51,7 +51,7 @@ public class DefaultYarnCloudAppService implements YarnCloudAppService, Initiali
 	private static final Logger logger = LoggerFactory.getLogger(DefaultYarnCloudAppService.class);
 	private final ApplicationContextInitializer<?>[] initializers;
 	private final String deployerVersion;
-	private final Map<String, YarnCloudAppServiceApplication> appCache = new HashMap<String, YarnCloudAppServiceApplication>();
+	private final Map<String, YarnCloudAppServiceApplication> appCache = new HashMap<>();
 
 	private Configuration configuration;
 

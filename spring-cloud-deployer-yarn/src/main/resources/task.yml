@@ -20,7 +20,7 @@ spring:
         options:
           - ${spring.cloud.deployer.yarn.app.taskappmaster.javaOpts:}
         arguments:
-          --Dspring.config.location: servers.yml
+          --Dspring.config.additional-location: servers.yml
         archiveFile: spring-cloud-deployer-yarn-tasklauncherappmaster-${spring.cloud.deployer.yarn.version}.jar
       localizer:
         patterns:

@@ -32,7 +32,7 @@ spring:
         arguments:
           --Dserver.port: 0
           --Dspring.jmx.enabled: false
-          --Dspring.config.location: servers.yml
+          --Dspring.config.additional-location: servers.yml
         locality: false
         archiveFile: placeholder.jar
     endpoints:
