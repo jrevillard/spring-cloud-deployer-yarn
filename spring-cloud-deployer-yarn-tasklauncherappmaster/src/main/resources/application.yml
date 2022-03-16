@@ -8,7 +8,7 @@ endpoints:
     enabled: true
 spring:
   main:
-    show_banner: false
+    banner-mode: false
   cloud:
     dataflow:
       yarn:
@@ -32,7 +32,7 @@ spring:
         arguments:
           --Dserver.port: 0
           --Dspring.jmx.enabled: false
-          --Dspring.config.additional-location: servers.yml
+          --Dspring.config.location: optional:servers.yml
         locality: false
         archiveFile: placeholder.jar
     endpoints:

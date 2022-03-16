@@ -29,6 +29,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -77,6 +79,7 @@ import org.springframework.yarn.client.YarnClient;
  */
 public class YarnCloudAppServiceApplication implements InitializingBean, DisposableBean {
 
+  private static final Logger logger = LoggerFactory.getLogger(YarnCloudAppServiceApplication.class);
   private ConfigurableApplicationContext context;
   private ApplicationContextInitializer<?>[] initializers;
   private List<Object> sources = new ArrayList<>();
@@ -147,10 +150,9 @@ public class YarnCloudAppServiceApplication implements InitializingBean, Disposa
   }
 
   public Collection<CloudAppInfo> getPushedApplications() {
-    List<CloudAppInfo> apps = new ArrayList<CloudAppInfo>();
+    List<CloudAppInfo> apps = new ArrayList<>();
     YarnConfiguration yarnConfiguration =
-        context.getBean("yarnConfiguration", YarnConfiguration.class);
-    SpringYarnProperties springYarnProperties = context.getBean(SpringYarnProperties.class);
+        context.getBean(YarnSystemConstants.DEFAULT_ID_CONFIGURATION, YarnConfiguration.class);
 
     String applicationBaseDir = springYarnProperties.getApplicationBaseDir();
     Path path = new Path(applicationBaseDir);
@@ -165,6 +167,8 @@ public class YarnCloudAppServiceApplication implements InitializingBean, Disposa
         apps.add(new CloudAppInfo(status.getPath().getName()));
       }
     } catch (Exception e) {
+      logger.error("Unable to list the application base directory: {}", path, e);
+      throw new RuntimeException(e);
     }
     return apps;
   }
@@ -336,8 +340,7 @@ public class YarnCloudAppServiceApplication implements InitializingBean, Disposa
   @Configuration
   @EnableAutoConfiguration(
       exclude = {ServletWebServerFactoryAutoConfiguration.class, WebMvcAutoConfiguration.class,
-          JmxAutoConfiguration.class, BatchAutoConfiguration.class, JmxAutoConfiguration.class,
-          EndpointAutoConfiguration.class},
+          JmxAutoConfiguration.class, BatchAutoConfiguration.class, EndpointAutoConfiguration.class},
       excludeName = {
           "org.springframework.cloud.dataflow.server.config.DataFlowControllerAutoConfiguration",
           "org.springframework.cloud.deployer.spi.yarn.autoconfigure.YarnDeployerAutoConfiguration",

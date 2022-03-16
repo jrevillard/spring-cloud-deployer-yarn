@@ -189,7 +189,7 @@ public class YarnTaskLauncher implements TaskLauncher {
 		// we need to block here until SPI supports
 		// returning id asynchronously
 		try {
-			return id.get(2, TimeUnit.MINUTES);
+			return id.get(10, TimeUnit.MINUTES);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -245,6 +245,25 @@ public class YarnTaskLauncher implements TaskLauncher {
 	@Override
 	public void destroy(String appName) {
 	}
+	
+
+	@Override
+    public int getMaximumConcurrentTasks() {
+        throw new UnsupportedOperationException("'getMaximumConcurrentTasks' is not implemented.");
+    };
+
+    @Override
+    public int getRunningTaskExecutionCount() {
+        throw new UnsupportedOperationException("'getRunningTaskExecutionCount' is not implemented.");
+    }
+
+    @Override
+    public String getLog(String id) {
+      logger.info("Logs request for module {}", id);
+      DeploymentKey key = new DeploymentKey(id);
+      
+      return yarnCloudAppService.getApplicationLogs(key.applicationId, CloudAppType.TASK);
+    }
 
 	@Override
 	public RuntimeEnvironmentInfo environmentInfo() {

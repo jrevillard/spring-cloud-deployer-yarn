@@ -153,6 +153,13 @@ public interface YarnCloudAppService {
 	void pushArtifact(Resource artifact, String dir);
 
 	/**
+	 * Return logs for a specific yarnApplicationId
+	 * @param yarnApplicationId the yarn application id
+	 * @param cloudAppType the cloud app type
+	 */
+	String getApplicationLogs(String yarnApplicationId, CloudAppType cloudAppType);
+
+	/**
 	 * Wrapping info about application pushed into hdfs.
 	 */
 	public class CloudAppInfo {

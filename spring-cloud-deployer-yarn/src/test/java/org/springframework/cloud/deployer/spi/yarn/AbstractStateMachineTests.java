@@ -191,5 +191,10 @@ public class AbstractStateMachineTests {
 		public void killApplication(String yarnApplicationId, CloudAppType cloudAppType) {
 		}
 
+        @Override
+        public String getApplicationLogs(String yarnApplicationId, CloudAppType cloudAppType) {
+          return null;
+        }
+
 	}
 }
