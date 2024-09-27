@@ -1,6 +1,6 @@
 spring:
   main:
-    show_banner: false
+    banner-mode: false
   cloud:
     deployer:
       yarn:
@@ -20,7 +20,7 @@ spring:
         options:
           - ${spring.cloud.deployer.yarn.app.taskappmaster.javaOpts:}
         arguments:
-          -Dspring.config.location: servers.yml
+          --Dspring.config.location: optional:servers.yml
         archiveFile: spring-cloud-deployer-yarn-tasklauncherappmaster-${spring.cloud.deployer.yarn.version}.jar
       localizer:
         patterns:

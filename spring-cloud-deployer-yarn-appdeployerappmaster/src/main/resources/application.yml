@@ -8,7 +8,7 @@ endpoints:
     enabled: true
 spring:
   main:
-    show_banner: false
+    banner-mode: false
   cloud:
     dataflow:
       yarn:
@@ -36,9 +36,9 @@ spring:
                 - ${spring.cloud.deployer.yarn.app.streamcontainer.javaOpts:}
                 - ${spring.cloud.deployer.yarn.app.streamcontainer.saslConfig:}
               arguments:
-                -Dserver.port: 0
-                -Dendpoints.jmx.unique-names: true
-                -Dspring.config.location: servers.yml
+                --Dserver.port: 0
+                --Dendpoints.jmx.unique-names: true
+                --Dspring.config.location: optional:servers.yml
               locality: false
               archiveFile: placeholder.jar
     endpoints:

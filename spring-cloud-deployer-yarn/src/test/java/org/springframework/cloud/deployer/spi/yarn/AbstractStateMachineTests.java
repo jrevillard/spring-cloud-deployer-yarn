@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,9 +25,9 @@ import java.util.concurrent.CountDownLatch;
 
 import org.junit.After;
 import org.junit.Before;
+
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.io.Resource;
-import org.springframework.yarn.support.console.ContainerClusterReport.ClustersInfoReportData;
 
 public class AbstractStateMachineTests {
 
@@ -190,6 +190,11 @@ public class AbstractStateMachineTests {
 		@Override
 		public void killApplication(String yarnApplicationId, CloudAppType cloudAppType) {
 		}
+
+        @Override
+        public String getApplicationLogs(String yarnApplicationId, CloudAppType cloudAppType) {
+          return null;
+        }
 
 	}
 }

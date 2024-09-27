@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,12 +17,11 @@
 package org.springframework.cloud.dataflow.yarn.buildtests;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
@@ -34,9 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,8 +41,8 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
-import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties.RemoteRepository;
+import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.LaunchState;
@@ -53,9 +50,9 @@ import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.deployer.spi.yarn.DefaultYarnCloudAppService;
 import org.springframework.cloud.deployer.spi.yarn.TaskLauncherStateMachine;
 import org.springframework.cloud.deployer.spi.yarn.YarnCloudAppService;
-import org.springframework.cloud.deployer.spi.yarn.YarnDeployerProperties;
 import org.springframework.cloud.deployer.spi.yarn.YarnCloudAppService.CloudAppInstanceInfo;
 import org.springframework.cloud.deployer.spi.yarn.YarnCloudAppService.CloudAppType;
+import org.springframework.cloud.deployer.spi.yarn.YarnDeployerProperties;
 import org.springframework.cloud.deployer.spi.yarn.YarnTaskLauncher;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
@@ -84,13 +81,13 @@ import org.springframework.yarn.test.support.ContainerLogUtils;
  */
 public class TaskLauncherIT extends AbstractCliBootYarnClusterTests {
 
-	private static final String GROUP_ID = "org.springframework.cloud.task.module";
-	private String artifactVersion;
+	private static final String GROUP_ID = "io.spring";
+	private String artifactVersionTimestampTask;
 	private AnnotationConfigApplicationContext context;
 
 	@Before
 	public void setup() {
-		artifactVersion = getEnvironment().getProperty("artifactVersion");
+	  artifactVersionTimestampTask = getEnvironment().getProperty("artifactVersionTimestampTask");
 		context = new AnnotationConfigApplicationContext();
 		context.getEnvironment().setActiveProfiles("yarn");
 		context.register(TestYarnConfiguration.class);
@@ -115,15 +112,14 @@ public class TaskLauncherIT extends AbstractCliBootYarnClusterTests {
 
 		MavenProperties m2Properties = new MavenProperties();
 		Map<String, RemoteRepository> remoteRepositories = new HashMap<>();
-		remoteRepositories.put("default", new RemoteRepository("https://repo.spring.io/libs-snapshot-local"));
+		remoteRepositories.put("default", new RemoteRepository(MAVEN_REPO));
 		m2Properties.setRemoteRepositories(remoteRepositories);
 
 		MavenResource resource = new MavenResource.Builder(m2Properties)
 				.artifactId("timestamp-task")
 				.groupId(GROUP_ID)
-				.version(artifactVersion)
+				.version(artifactVersionTimestampTask)
 				.extension("jar")
-				.classifier("exec")
 				.build();
 
 		AppDefinition definition = new AppDefinition("timestamp-task", null);
@@ -138,7 +134,7 @@ public class TaskLauncherIT extends AbstractCliBootYarnClusterTests {
 				getYarnCluster(), applicationId);
 
 		assertThat(resources, notNullValue());
-		assertThat(resources.size(), is(4));
+		assertThat(resources.size(), is(12));
 	}
 
 	@Test
@@ -150,20 +146,19 @@ public class TaskLauncherIT extends AbstractCliBootYarnClusterTests {
 
 		MavenProperties m2Properties = new MavenProperties();
 		Map<String, RemoteRepository> remoteRepositories = new HashMap<>();
-		remoteRepositories.put("default", new RemoteRepository("https://repo.spring.io/libs-snapshot-local"));
+		remoteRepositories.put("default", new RemoteRepository(MAVEN_REPO));
 		m2Properties.setRemoteRepositories(remoteRepositories);
 
 		MavenResource resource = new MavenResource.Builder(m2Properties)
 				.artifactId("timestamp-task")
 				.groupId(GROUP_ID)
-				.version(artifactVersion)
+				.version(artifactVersionTimestampTask)
 				.extension("jar")
-				.classifier("exec")
 				.build();
 
 		AppDefinition definition = new AppDefinition("timestamp-task", null);
 		List<String> commandlineArgs = new ArrayList<String>();
-		commandlineArgs.add("--format=yyyyMMdd yyyy");
+		commandlineArgs.add("--timestamp.format=yyyyMMdd yyyy");
 		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, null, commandlineArgs);
 		String id = deployer.launch(request);
 		assertThat(id, notNullValue());
@@ -175,7 +170,7 @@ public class TaskLauncherIT extends AbstractCliBootYarnClusterTests {
 				getYarnCluster(), applicationId);
 
 		assertThat(resources, notNullValue());
-		assertThat(resources.size(), is(4));
+		assertThat(resources.size(), is(12));
 
 		for (Resource res : resources) {
 			File file = res.getFile();
@@ -200,22 +195,20 @@ public class TaskLauncherIT extends AbstractCliBootYarnClusterTests {
 
 		MavenProperties m2Properties = new MavenProperties();
 		Map<String, RemoteRepository> remoteRepositories = new HashMap<>();
-		remoteRepositories.put("default", new RemoteRepository("https://repo.spring.io/libs-snapshot-local"));
+		remoteRepositories.put("default", new RemoteRepository(MAVEN_REPO));
 		m2Properties.setRemoteRepositories(remoteRepositories);
 
 		MavenResource base = new MavenResource.Builder(m2Properties)
 				.artifactId("timestamp-task")
 				.groupId(GROUP_ID)
-				.version(artifactVersion)
+				.version(artifactVersionTimestampTask)
 				.extension("jar")
-				.classifier("exec")
 				.build();
 		copyFile(base, "/dataflow/artifacts/repo/");
 
-		@SuppressWarnings("resource")
 		HdfsResourceLoader resourceLoader = new HdfsResourceLoader(getConfiguration());
 		resourceLoader.setHandleNoprefix(true);
-		Resource resource = resourceLoader.getResource("hdfs:/dataflow/artifacts/repo/timestamp-task-1.0.0.BUILD-SNAPSHOT-exec.jar");
+		Resource resource = resourceLoader.getResource("hdfs:/dataflow/artifacts/repo/timestamp-task-" + artifactVersionTimestampTask + ".jar");
 
 		AppDefinition definition = new AppDefinition("timestamp-task", null);
 		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource);
@@ -229,7 +222,7 @@ public class TaskLauncherIT extends AbstractCliBootYarnClusterTests {
 				getYarnCluster(), applicationId);
 
 		assertThat(resources, notNullValue());
-		assertThat(resources.size(), is(4));
+		assertThat(resources.size(), is(12));
 	}
 
 	@Test
@@ -238,10 +231,9 @@ public class TaskLauncherIT extends AbstractCliBootYarnClusterTests {
 		assertThat(context.getBean("taskLauncher"), instanceOf(YarnTaskLauncher.class));
 		TaskLauncher deployer = context.getBean("taskLauncher", TaskLauncher.class);
 
-		@SuppressWarnings("resource")
 		HdfsResourceLoader resourceLoader = new HdfsResourceLoader(getConfiguration());
 		resourceLoader.setHandleNoprefix(true);
-		Resource resource = resourceLoader.getResource("hdfs:/dataflow/artifacts/cache/timestamp-task-1.0.0.BUILD-SNAPSHOT-exec.jar");
+		Resource resource = resourceLoader.getResource("hdfs:/dataflow/artifacts/cache/timestamp-task-" + artifactVersionTimestampTask + ".jar");
 
 		AppDefinition definition = new AppDefinition("timestamp-task", null);
 		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource);
@@ -254,6 +246,7 @@ public class TaskLauncherIT extends AbstractCliBootYarnClusterTests {
 			deployException = e;
 		}
 		assertThat("Expected deploy exception", deployException, notNullValue());
+		assertThat("Expected deploy exception message", deployException.getMessage(), containsString("hdfs artifact missing"));
 	}
 
 	@Test
@@ -265,15 +258,14 @@ public class TaskLauncherIT extends AbstractCliBootYarnClusterTests {
 
 		MavenProperties m2Properties = new MavenProperties();
 		Map<String, RemoteRepository> remoteRepositories = new HashMap<>();
-		remoteRepositories.put("default", new RemoteRepository("https://repo.spring.io/libs-snapshot-local"));
+		remoteRepositories.put("default", new RemoteRepository(MAVEN_REPO));
 		m2Properties.setRemoteRepositories(remoteRepositories);
 
 		MavenResource resource = new MavenResource.Builder(m2Properties)
 				.artifactId("timestamp-task")
 				.groupId(GROUP_ID)
-				.version(artifactVersion)
+				.version(artifactVersionTimestampTask)
 				.extension("jar")
-				.classifier("exec")
 				.build();
 
 		Map<String, String> properties = new HashMap<String, String>();
@@ -296,7 +288,7 @@ public class TaskLauncherIT extends AbstractCliBootYarnClusterTests {
 				getYarnCluster(), applicationId);
 
 		assertThat(resources, notNullValue());
-		assertThat(resources.size(), is(4));
+		assertThat(resources.size(), is(12));
 
 		for (Resource res : resources) {
 			File file = res.getFile();
@@ -312,7 +304,7 @@ public class TaskLauncherIT extends AbstractCliBootYarnClusterTests {
 	private void copyFile(Resource artifact, String dir) throws Exception {
 		File tmp = File.createTempFile(UUID.randomUUID().toString(), null);
 		FileCopyUtils.copy(artifact.getInputStream(), new FileOutputStream(tmp));
-		@SuppressWarnings("resource")
+
 		FsShell shell = new FsShell(getConfiguration());
 		String artifactPath = dir + artifact.getFile().getName();
 		if (!shell.test(artifactPath)) {
@@ -330,7 +322,7 @@ public class TaskLauncherIT extends AbstractCliBootYarnClusterTests {
 			if (instances.size() == 1) {
 				CloudAppInstanceInfo cloudAppInstanceInfo = instances.iterator().next();
 				if (StringUtils.hasText(cloudAppInstanceInfo.getAddress())) {
-					applicationId = ConverterUtils.toApplicationId(cloudAppInstanceInfo.getApplicationId());
+					applicationId = ApplicationId.fromString(cloudAppInstanceInfo.getApplicationId());
 					break;
 				}
 			}

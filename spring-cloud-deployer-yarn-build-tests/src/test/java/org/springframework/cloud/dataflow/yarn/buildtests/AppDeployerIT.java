@@ -17,10 +17,10 @@
 package org.springframework.cloud.dataflow.yarn.buildtests;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -33,16 +33,16 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
-import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties.RemoteRepository;
+import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
@@ -51,9 +51,9 @@ import org.springframework.cloud.deployer.spi.yarn.AppDeployerStateMachine;
 import org.springframework.cloud.deployer.spi.yarn.DefaultYarnCloudAppService;
 import org.springframework.cloud.deployer.spi.yarn.YarnAppDeployer;
 import org.springframework.cloud.deployer.spi.yarn.YarnCloudAppService;
-import org.springframework.cloud.deployer.spi.yarn.YarnDeployerProperties;
 import org.springframework.cloud.deployer.spi.yarn.YarnCloudAppService.CloudAppInstanceInfo;
 import org.springframework.cloud.deployer.spi.yarn.YarnCloudAppService.CloudAppType;
+import org.springframework.cloud.deployer.spi.yarn.YarnDeployerProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -81,13 +81,17 @@ import org.springframework.yarn.test.support.ContainerLogUtils;
  */
 public class AppDeployerIT extends AbstractCliBootYarnClusterTests {
 
-	private static final String GROUP_ID = "org.springframework.cloud.stream.module";
-	private String artifactVersion;
+    protected static final String GROUP_ID = "org.springframework.cloud.stream.app";
+	private String artifactVersionSourceTime;
+	private String artifactVersionLogSink;
+	private String artifactVersionHdfsSink;
 	private AnnotationConfigApplicationContext context;
 
 	@Before
 	public void setup() {
-		artifactVersion = getEnvironment().getProperty("artifactVersion");
+		artifactVersionSourceTime = getEnvironment().getProperty("artifactVersionSourceTime");
+		artifactVersionLogSink = getEnvironment().getProperty("artifactVersionLogSink");
+		artifactVersionHdfsSink = getEnvironment().getProperty("artifactVersionHdfsSink");
 		context = new AnnotationConfigApplicationContext();
 		context.getEnvironment().setActiveProfiles("yarn");
 		context.register(TestYarnConfiguration.class);
@@ -112,23 +116,21 @@ public class AppDeployerIT extends AbstractCliBootYarnClusterTests {
 
 		MavenProperties m2Properties = new MavenProperties();
 		Map<String, RemoteRepository> remoteRepositories = new HashMap<>();
-		remoteRepositories.put("default", new RemoteRepository("https://repo.spring.io/libs-snapshot-local"));
+		remoteRepositories.put("default", new RemoteRepository(MAVEN_REPO));
 		m2Properties.setRemoteRepositories(remoteRepositories);
 
 		MavenResource timeResource = new MavenResource.Builder(m2Properties)
-				.artifactId("time-source")
+				.artifactId("spring-cloud-starter-stream-source-time")
 				.groupId(GROUP_ID)
-				.version(artifactVersion)
+				.version(artifactVersionSourceTime)
 				.extension("jar")
-				.classifier("exec")
 				.build();
 
 		MavenResource logResource = new MavenResource.Builder(m2Properties)
-				.artifactId("log-sink")
+				.artifactId("spring-cloud-starter-stream-sink-log")
 				.groupId(GROUP_ID)
-				.version(artifactVersion)
+				.version(artifactVersionLogSink)
 				.extension("jar")
-				.classifier("exec")
 				.build();
 
 		Map<String, String> timeProperties = new HashMap<>();
@@ -198,33 +200,30 @@ public class AppDeployerIT extends AbstractCliBootYarnClusterTests {
 
 		MavenProperties m2Properties = new MavenProperties();
 		Map<String, RemoteRepository> remoteRepositories = new HashMap<>();
-		remoteRepositories.put("default", new RemoteRepository("https://repo.spring.io/libs-snapshot-local"));
+		remoteRepositories.put("default", new RemoteRepository(MAVEN_REPO));
 		m2Properties.setRemoteRepositories(remoteRepositories);
 
 		MavenResource timeResourceBase = new MavenResource.Builder(m2Properties)
-				.artifactId("time-source")
+				.artifactId("spring-cloud-starter-stream-source-time")
 				.groupId(GROUP_ID)
-				.version(artifactVersion)
+				.version(artifactVersionSourceTime)
 				.extension("jar")
-				.classifier("exec")
 				.build();
 
 		MavenResource logResourceBase = new MavenResource.Builder(m2Properties)
-				.artifactId("log-sink")
+				.artifactId("spring-cloud-starter-stream-sink-log")
 				.groupId(GROUP_ID)
-				.version(artifactVersion)
+				.version(artifactVersionLogSink)
 				.extension("jar")
-				.classifier("exec")
 				.build();
 
 		copyFile(timeResourceBase, "/dataflow/artifacts/repo/");
 		copyFile(logResourceBase, "/dataflow/artifacts/repo/");
 
-		@SuppressWarnings("resource")
 		HdfsResourceLoader resourceLoader = new HdfsResourceLoader(getConfiguration());
 		resourceLoader.setHandleNoprefix(true);
-		Resource timeResource = resourceLoader.getResource("hdfs:/dataflow/artifacts/repo/time-source-1.0.0.BUILD-SNAPSHOT-exec.jar");
-		Resource logResource = resourceLoader.getResource("hdfs:/dataflow/artifacts/repo/log-sink-1.0.0.BUILD-SNAPSHOT-exec.jar");
+		Resource timeResource = resourceLoader.getResource("hdfs:/dataflow/artifacts/repo/spring-cloud-starter-stream-source-time-" + artifactVersionSourceTime + ".jar");
+		Resource logResource = resourceLoader.getResource("hdfs:/dataflow/artifacts/repo/spring-cloud-starter-stream-sink-log-" + artifactVersionLogSink + ".jar");
 
 		Map<String, String> timeProperties = new HashMap<>();
 		timeProperties.put("spring.cloud.stream.bindings.output.destination", "ticktock.0");
@@ -294,23 +293,21 @@ public class AppDeployerIT extends AbstractCliBootYarnClusterTests {
 
 		MavenProperties m2Properties = new MavenProperties();
 		Map<String, RemoteRepository> remoteRepositories = new HashMap<>();
-		remoteRepositories.put("default", new RemoteRepository("https://repo.spring.io/libs-snapshot-local"));
+		remoteRepositories.put("default", new RemoteRepository(MAVEN_REPO));
 		m2Properties.setRemoteRepositories(remoteRepositories);
 
 		MavenResource timeResource = new MavenResource.Builder(m2Properties)
-				.artifactId("time-source")
+				.artifactId("spring-cloud-starter-stream-source-time")
 				.groupId(GROUP_ID)
-				.version(artifactVersion)
+				.version(artifactVersionSourceTime)
 				.extension("jar")
-				.classifier("exec")
 				.build();
 
 		MavenResource hdfsResource = new MavenResource.Builder(m2Properties)
-				.artifactId("hdfs-sink")
+				.artifactId("spring-cloud-starter-stream-sink-hdfs")
 				.groupId(GROUP_ID)
-				.version(artifactVersion)
+				.version(artifactVersionHdfsSink)
 				.extension("jar")
-				.classifier("exec")
 				.build();
 
 		Map<String, String> timeProperties = new HashMap<>();
@@ -367,23 +364,21 @@ public class AppDeployerIT extends AbstractCliBootYarnClusterTests {
 
 		MavenProperties m2Properties = new MavenProperties();
 		Map<String, RemoteRepository> remoteRepositories = new HashMap<>();
-		remoteRepositories.put("default", new RemoteRepository("https://repo.spring.io/libs-snapshot-local"));
+		remoteRepositories.put("default", new RemoteRepository(MAVEN_REPO));
 		m2Properties.setRemoteRepositories(remoteRepositories);
 
 		MavenResource timeResource = new MavenResource.Builder(m2Properties)
-				.artifactId("time-source")
+				.artifactId("spring-cloud-starter-stream-source-time")
 				.groupId(GROUP_ID)
-				.version(artifactVersion)
+				.version(artifactVersionSourceTime)
 				.extension("jar")
-				.classifier("exec")
 				.build();
 
 		MavenResource logResource = new MavenResource.Builder(m2Properties)
-				.artifactId("log-sink")
+				.artifactId("spring-cloud-starter-stream-sink-log")
 				.groupId(GROUP_ID)
-				.version(artifactVersion)
+				.version(artifactVersionLogSink)
 				.extension("jar")
-				.classifier("exec")
 				.build();
 
 		Map<String, String> timeProperties = new HashMap<>();
@@ -454,7 +449,7 @@ public class AppDeployerIT extends AbstractCliBootYarnClusterTests {
 	private void copyFile(Resource artifact, String dir) throws Exception {
 		File tmp = File.createTempFile(UUID.randomUUID().toString(), null);
 		FileCopyUtils.copy(artifact.getInputStream(), new FileOutputStream(tmp));
-		@SuppressWarnings("resource")
+
 		FsShell shell = new FsShell(getConfiguration());
 		String artifactPath = dir + artifact.getFile().getName();
 		if (!shell.test(artifactPath)) {
@@ -472,7 +467,7 @@ public class AppDeployerIT extends AbstractCliBootYarnClusterTests {
 			if (instances.size() == 1) {
 				CloudAppInstanceInfo cloudAppInstanceInfo = instances.iterator().next();
 				if (StringUtils.hasText(cloudAppInstanceInfo.getAddress())) {
-					applicationId = ConverterUtils.toApplicationId(cloudAppInstanceInfo.getApplicationId());
+					applicationId = ApplicationId.fromString(cloudAppInstanceInfo.getApplicationId());
 					break;
 				}
 			}

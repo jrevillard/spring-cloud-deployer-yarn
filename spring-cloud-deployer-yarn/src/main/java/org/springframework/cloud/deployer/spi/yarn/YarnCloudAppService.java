@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.io.Resource;
-import org.springframework.yarn.support.console.ContainerClusterReport.ClustersInfoReportData;
 
 /**
  * Interface used to glue a state machine and yarn application logic together.
@@ -152,6 +151,13 @@ public interface YarnCloudAppService {
 	 * @param dir the dir
 	 */
 	void pushArtifact(Resource artifact, String dir);
+
+	/**
+	 * Return logs for a specific yarnApplicationId
+	 * @param yarnApplicationId the yarn application id
+	 * @param cloudAppType the cloud app type
+	 */
+	String getApplicationLogs(String yarnApplicationId, CloudAppType cloudAppType);
 
 	/**
 	 * Wrapping info about application pushed into hdfs.
